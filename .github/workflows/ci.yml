@@ -13,10 +13,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -49,6 +49,12 @@ jobs:
 
       - name: Install dbt packages
         run: dbt deps
+
+      - name: Print profiles.yml
+        run: cat ~/.dbt/profiles.yml
+
+      - name: dbt debug
+        run: dbt debug
 
       - name: Compile (syntax check)
         run: dbt compile
