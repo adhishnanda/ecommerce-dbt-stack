@@ -263,13 +263,13 @@ ecommerce-dbt-stack/
 Full reasoning is documented in [`DECISIONS.md`](DECISIONS.md). Three choices worth calling out:
 
 **Why star schema over wide tables**
-A single wide table joining all dimensions would be simpler to build but expensive to query — every scan reads columns irrelevant to the current question. The star schema separates facts (what happened) from dimensions (who and what was involved), enabling BigQuery to prune columns efficiently and allowing BI tools to join only what they need. It also maps directly to how business questions are phrased: *"how much did High Value customers spend last quarter?"* is a natural join of `fct_orders` and `dim_customers`.
+A single wide table joining all dimensions would be simpler to build but expensive to query, every scan reads columns irrelevant to the current question. The star schema separates facts (what happened) from dimensions (who and what was involved), enabling BigQuery to prune columns efficiently and allowing BI tools to join only what they need. It also maps directly to how business questions are phrased: *"how much did High Value customers spend last quarter?"* is a natural join of `fct_orders` and `dim_customers`.
 
 **Why three layers instead of staging directly to marts**
-The intermediate layer exists because business logic is reused. Delivery delay calculations, payment aggregations, and customer lifetime metrics are each needed by multiple downstream models. Defining them once in `int_orders_with_delivery` and `int_customer_orders` means a single source of truth — change the logic in one place and it propagates everywhere. Without this layer, the same logic would be copy-pasted into every mart and would inevitably diverge.
+The intermediate layer exists because business logic is reused. Delivery delay calculations, payment aggregations, and customer lifetime metrics are each needed by multiple downstream models. Defining them once in `int_orders_with_delivery` and `int_customer_orders` means a single source of truth, change the logic in one place and it propagates everywhere. Without this layer, the same logic would be copy-pasted into every mart and would inevitably diverge.
 
 **Why views for staging/intermediate and tables for marts**
-Staging and intermediate models are lightweight transformations over source tables that BigQuery already stores. Materialising them as views means zero storage cost and always-fresh data with no incremental logic needed. Marts are materialised as tables because they are the query target for Looker Studio, which executes aggregations over 99k+ rows — a physical table eliminates repeated view chaining and keeps dashboard load times fast.
+Staging and intermediate models are lightweight transformations over source tables that BigQuery already stores. Materialising them as views means zero storage cost and always-fresh data with no incremental logic needed. Marts are materialised as tables because they are the query target for Looker Studio, which executes aggregations over 99k+ rows - a physical table eliminates repeated view chaining and keeps dashboard load times fast.
 
 ---
 
