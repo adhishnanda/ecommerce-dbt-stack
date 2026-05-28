@@ -5,4 +5,9 @@ logs/
 *.json
 __pycache__/
 .env
-DECISIONS.md
+.claude
+docs/olist_data
+docs/architecture.dot
+docs/dbt_analytics_stack_guide.md
+docs/ecommerce-dbt-stack-0bfba696cca0
+docs/Portfolio_Project_2-dbt_Analytics.docx
