@@ -37,7 +37,7 @@ jobs:
                 type: bigquery
                 method: service-account
                 project: ecommerce-dbt-stack
-                dataset: staging
+                dataset: ecommerce_dbt
                 location: europe-west10
                 keyfile: /home/runner/.dbt/bq-credentials.json
                 threads: 4
