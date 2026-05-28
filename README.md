@@ -6,7 +6,7 @@
 
 ![dbt](https://img.shields.io/badge/dbt-1.11-FF694B?logo=dbt&logoColor=white)
 ![BigQuery](https://img.shields.io/badge/BigQuery-4285F4?logo=googlebigquery&logoColor=white)
-![CI](https://github.com/adhishnanda/ecommerce-dbt-stack/actions/workflows/ci.yml/badge.svg)
+[![CI](https://github.com/adhishnanda/ecommerce-dbt-stack/actions/workflows/ci.yml/badge.svg)](https://github.com/adhishnanda/ecommerce-dbt-stack/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-94_passing-brightgreen)
 
