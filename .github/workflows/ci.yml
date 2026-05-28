@@ -1,0 +1,57 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  dbt-staging-tests:
+    name: Compile and test staging layer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dbt-bigquery
+        run: pip install dbt-bigquery==1.11.1
+
+      - name: Write BigQuery credentials
+        run: |
+          mkdir -p ~/.dbt
+          echo '${{ secrets.GCP_CREDENTIALS_JSON }}' > ~/.dbt/bq-credentials.json
+
+      - name: Write profiles.yml
+        run: |
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          ecommerce_dbt:
+            outputs:
+              dev:
+                type: bigquery
+                method: service-account
+                project: ecommerce-dbt-stack
+                dataset: staging
+                location: europe-west10
+                keyfile: /home/runner/.dbt/bq-credentials.json
+                threads: 4
+                job_execution_timeout_seconds: 300
+                job_retries: 1
+                priority: interactive
+            target: dev
+          EOF
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Compile (syntax check)
+        run: dbt compile
+
+      - name: Test staging layer
+        run: dbt test --select staging
