@@ -24,7 +24,7 @@
 
 ## Overview
 
-This project implements a full Analytics Engineering stack on the [Olist Brazilian E-Commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce) — a real-world dataset of 100k+ orders placed across a Brazilian marketplace between 2016 and 2018. Raw CSV data is ingested into BigQuery and transformed through a three-layer dbt pipeline into a Kimball star schema, backed by 94 automated data quality tests and a CI/CD pipeline that validates every pull request. The result is a production-ready analytical foundation surfaced through a Looker Studio dashboard covering delivery performance, customer segmentation, revenue attribution, and product analytics.
+This project implements a full Analytics Engineering stack on the [Olist Brazilian E-Commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), a real-world dataset of 100k+ orders placed across a Brazilian marketplace between 2016 and 2018. Raw CSV data is ingested into BigQuery and transformed through a three-layer dbt pipeline into a Kimball star schema, backed by 94 automated data quality tests and a CI/CD pipeline that validates every pull request. The result is a production-ready analytical foundation surfaced through a Looker Studio dashboard covering delivery performance, customer segmentation, revenue attribution, and product analytics.
 
 ---
 
