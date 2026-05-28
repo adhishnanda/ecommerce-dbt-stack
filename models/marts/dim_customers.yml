@@ -1,0 +1,88 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: >
+      Customer dimension table. One row per unique shopper (customer_unique_id).
+      Aggregates lifetime order history from int_customer_orders and adds
+      value and loyalty segmentation for BI filtering and cohort analysis.
+    columns:
+      - name: customer_key
+        description: >
+          Surrogate primary key generated from customer_unique_id via
+          dbt_utils.generate_surrogate_key. Use as the FK target from fct_orders.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        description: >
+          Natural key. Stable identifier for a shopper across multiple orders.
+          Distinct from customer_id, which is order-scoped in the source data.
+        tests:
+          - not_null
+          - unique
+
+      - name: total_orders
+        description: Total number of orders placed by this customer.
+        tests:
+          - not_null
+
+      - name: first_order_at
+        description: Timestamp of the customer's earliest order.
+        tests:
+          - not_null
+
+      - name: last_order_at
+        description: Timestamp of the customer's most recent order.
+        tests:
+          - not_null
+
+      - name: lifetime_value
+        description: >
+          Sum of total_payment_value across all orders in BRL, rounded to 2 decimal places.
+          Null when all of a customer's orders have no payment records (e.g. created/canceled
+          before payment was processed). Not tested for not_null for this reason.
+
+      - name: avg_order_value
+        description: >
+          Average total_payment_value per order in BRL, rounded to 2 decimal places.
+          Null for the same reason as lifetime_value. Not tested for not_null.
+
+      - name: avg_satisfaction_score
+        description: >
+          Average of per-order avg_review_score across all orders with reviews.
+          Null if the customer never submitted a review.
+
+      - name: acquisition_cohort
+        description: >
+          Quarter in which the customer placed their first order, formatted as "YYYY-QN"
+          (e.g. "2017-Q3"). Use for cohort retention and revenue-by-cohort analysis.
+        tests:
+          - not_null
+
+      - name: value_segment
+        description: >
+          Customer lifetime value tier. Thresholds: High Value >= 1000 BRL,
+          Mid Value >= 300 BRL, Low Value < 300 BRL.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - High Value
+                  - Mid Value
+                  - Low Value
+
+      - name: loyalty_segment
+        description: >
+          Customer order frequency tier. Repeat = 3+ orders, Returning = exactly 2 orders,
+          One-Time = exactly 1 order.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - Repeat
+                  - Returning
+                  - One-Time

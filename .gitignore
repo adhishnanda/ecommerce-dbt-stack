@@ -5,3 +5,4 @@ logs/
 *.json
 __pycache__/
 .env
+DECISIONS.md

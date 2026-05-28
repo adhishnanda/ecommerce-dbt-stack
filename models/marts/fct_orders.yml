@@ -1,0 +1,124 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: >
+      Order fact table. One row per order, enriched with customer keys,
+      date dimensions, aggregated item metrics, payment totals, delivery
+      performance, and review scores. Intended as the primary analytical
+      table for order-level reporting.
+    columns:
+      - name: order_id
+        description: Natural primary key for the order, sourced from the Olist platform.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_key
+        description: >
+          Surrogate FK to dim_customers. Generated from customer_unique_id via
+          dbt_utils.generate_surrogate_key. Use this to join to the customer dimension.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_key
+
+      - name: customer_unique_id
+        description: Stable natural identifier for the shopper. Denormalised for convenience.
+        tests:
+          - not_null
+
+      - name: order_date
+        description: Calendar date the order was placed (DATE cast of order_purchased_at).
+        tests:
+          - not_null
+
+      - name: order_year
+        description: Calendar year the order was placed (integer).
+        tests:
+          - not_null
+
+      - name: order_month
+        description: Calendar month the order was placed (integer 1–12).
+        tests:
+          - not_null
+
+      - name: order_year_month
+        description: >
+          Year-month string in YYYY-MM format (e.g. "2017-09").
+          Useful for time-series aggregations without full date granularity.
+        tests:
+          - not_null
+
+      - name: order_status
+        description: Lifecycle status of the order at extraction time.
+        tests:
+          - not_null
+
+      - name: order_purchased_at
+        description: Timestamp when the customer submitted the order.
+        tests:
+          - not_null
+
+      - name: order_approved_at
+        description: Timestamp when payment was approved. Null for orders canceled before payment.
+
+      - name: order_delivered_carrier_at
+        description: Timestamp when the seller handed the package to the carrier. Null if not shipped.
+
+      - name: order_delivered_customer_at
+        description: Timestamp of customer delivery. Null for undelivered orders.
+
+      - name: order_estimated_delivery_at
+        description: Estimated delivery timestamp shown to the customer at purchase.
+        tests:
+          - not_null
+
+      - name: total_payment_value
+        description: Sum of all payment entries for the order in BRL, including split payment methods.
+
+      - name: payment_types
+        description: >
+          Alphabetically sorted comma-separated list of distinct payment methods
+          used (e.g. "boleto", "credit_card, voucher").
+
+      - name: payment_method_count
+        description: Number of payment sequence rows for the order.
+
+      - name: avg_review_score
+        description: Average customer review score (1–5). Null if no review was submitted.
+
+      - name: review_count
+        description: Number of review rows in the raw source for this order (may include duplicates).
+
+      - name: days_to_ship
+        description: Integer days from order placement to carrier handoff. Null if not shipped.
+
+      - name: days_to_delivery
+        description: Integer days from order placement to customer delivery. Null if not delivered.
+
+      - name: delivery_delay_days
+        description: >
+          Days actual delivery exceeded the estimated date. Positive = late, negative = early.
+          Null for undelivered orders.
+
+      - name: delivered_on_time
+        description: >
+          True if delivered on or before the estimated date, false if late, null if not delivered.
+
+      - name: item_count
+        description: Total number of line items (units) in the order.
+
+      - name: distinct_product_count
+        description: Number of distinct products in the order.
+
+      - name: distinct_seller_count
+        description: Number of distinct sellers fulfilling the order.
+
+      - name: total_items_value
+        description: Sum of (price + freight_value) across all line items in BRL.
+
+      - name: total_freight_value
+        description: Sum of freight_value across all line items in BRL.

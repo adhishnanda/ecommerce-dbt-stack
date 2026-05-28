@@ -1,0 +1,93 @@
+version: 2
+
+models:
+  - name: int_orders_with_delivery
+    description: >
+      Orders enriched with aggregated payment totals, payment method lists,
+      average review scores, and delivery performance metrics.
+      One row per order — grain is preserved from stg_orders.
+      All delivery timing columns are null for orders that have not yet been delivered.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+    columns:
+      - name: order_id
+        description: Primary key. One row per order, inherited from stg_orders.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: FK to stg_customers (order-scoped identifier).
+        tests:
+          - not_null
+
+      - name: order_status
+        description: Lifecycle status of the order at extraction time.
+        tests:
+          - not_null
+
+      - name: order_purchased_at
+        description: Timestamp when the customer submitted the order.
+        tests:
+          - not_null
+
+      - name: order_approved_at
+        description: Timestamp when payment was approved. Null for canceled orders.
+
+      - name: order_delivered_carrier_at
+        description: Timestamp when the seller handed the package to the carrier. Null if not shipped.
+
+      - name: order_delivered_customer_at
+        description: Timestamp when the order was delivered to the customer. Null if not delivered.
+
+      - name: order_estimated_delivery_at
+        description: Estimated delivery date shown to the customer at purchase time.
+        tests:
+          - not_null
+
+      - name: total_payment_value
+        description: >
+          Sum of all payment_value entries for the order in BRL.
+          Covers split payments (e.g. voucher + credit card on the same order).
+
+      - name: payment_types
+        description: >
+          Alphabetically sorted, comma-separated list of distinct payment methods
+          used on the order (e.g. "boleto, credit_card", "voucher").
+
+      - name: payment_method_count
+        description: Number of payment sequence rows for the order.
+
+      - name: avg_review_score
+        description: >
+          Average review score (1–5) across all review rows for this order.
+          Null if the customer did not submit a review. Rounded to 2 decimal places.
+          Note: the raw source contains duplicate review_id rows; this average
+          is computed over all raw rows, not deduplicated reviews.
+
+      - name: review_count
+        description: Count of review rows in the raw source for this order, including duplicates.
+
+      - name: days_to_ship
+        description: >
+          Integer days from order_purchased_at to order_delivered_carrier_at.
+          Null if the order was never handed to the carrier.
+
+      - name: days_to_delivery
+        description: >
+          Integer days from order_purchased_at to order_delivered_customer_at.
+          Null if the order was never delivered.
+
+      - name: delivery_delay_days
+        description: >
+          Integer days by which actual delivery exceeded the estimated delivery date.
+          Positive = late, negative = early, zero = on the exact promised date.
+          Null if the order was never delivered.
+
+      - name: delivered_on_time
+        description: >
+          True if order_delivered_customer_at <= order_estimated_delivery_at,
+          false if the order arrived late, null if not yet delivered.
