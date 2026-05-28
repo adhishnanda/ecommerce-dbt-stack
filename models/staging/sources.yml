@@ -1,0 +1,105 @@
+version: 2
+
+sources:
+  - name: raw_ecommerce
+    database: ecommerce-dbt-stack
+    schema: raw_ecommerce
+    tables:
+      - name: orders
+        description: Root table for all orders placed on the platform.
+        columns:
+          - name: order_id
+            description: Unique identifier for each order.
+            tests:
+              - not_null
+              - unique
+          - name: customer_id
+            tests:
+              - not_null
+
+      - name: customers
+        description: Customer dimension with one row per unique customer.
+        columns:
+          - name: customer_id
+            description: Unique identifier for each customer.
+            tests:
+              - not_null
+              - unique
+          - name: customer_unique_id
+            tests:
+              - not_null
+
+      - name: order_items
+        description: Line items for each order, one row per item per order.
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+          - name: order_item_id
+            description: Sequential item number within an order (1-indexed).
+            tests:
+              - not_null
+
+      - name: products
+        description: Product catalog with category and dimension attributes.
+        columns:
+          - name: product_id
+            description: Unique identifier for each product.
+            tests:
+              - not_null
+              - unique
+
+      - name: sellers
+        description: Seller dimension with location information.
+        columns:
+          - name: seller_id
+            description: Unique identifier for each seller.
+            tests:
+              - not_null
+              - unique
+
+      - name: order_reviews
+        description: Customer reviews submitted after order delivery.
+        columns:
+          - name: review_id
+            description: Unique identifier for each review.
+            tests:
+              - not_null
+          - name: order_id
+            tests:
+              - not_null
+
+      - name: order_payments
+        description: Payment records, one row per payment sequence per order.
+        columns:
+          - name: order_id
+            tests:
+              - not_null
+          - name: payment_sequential
+            description: Sequence number for multiple payments on a single order.
+            tests:
+              - not_null
+
+      - name: geolocation
+        description: Brazilian zip code prefixes mapped to lat/lng and city/state.
+        columns:
+          - name: geolocation_zip_code_prefix
+            description: 5-digit zip code prefix.
+            tests:
+              - not_null
+
+      - name: product_category_translation
+        description: Portuguese-to-English translation of product category names.
+        columns:
+          - name: string_field_0
+            description: >
+              Category name in Portuguese. Auto-named by BigQuery because
+              skip_leading_rows=1 caused the CSV header row to be skipped
+              during autodetect — actual CSV column is product_category_name.
+            tests:
+              - not_null
+              - unique
+          - name: string_field_1
+            description: >
+              Category name in English. Auto-named by BigQuery for the same
+              reason — actual CSV column is product_category_name_english.

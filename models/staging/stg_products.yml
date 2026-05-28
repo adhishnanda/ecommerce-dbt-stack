@@ -1,0 +1,46 @@
+version: 2
+
+models:
+  - name: stg_products
+    description: >
+      Cleaned product catalog sourced from raw_ecommerce.products.
+      One row per product. Category names are in Portuguese; join to
+      stg_product_category_translation for English equivalents.
+      Dimension columns (weight, size) are nullable — not all listings
+      have complete physical attributes.
+    columns:
+      - name: product_id
+        description: Primary key. Unique identifier for each product listing.
+        tests:
+          - not_null
+          - unique
+
+      - name: product_category_name
+        description: >
+          Product category in Portuguese. Nullable — a small share of products
+          have no category assigned in the source data.
+
+      - name: product_name_length
+        description: >
+          Number of characters in the product name field.
+          Renamed from the source typo product_name_lenght.
+
+      - name: product_description_length
+        description: >
+          Number of characters in the product description field.
+          Renamed from the source typo product_description_lenght.
+
+      - name: product_photos_qty
+        description: Number of product photos published on the listing.
+
+      - name: product_weight_g
+        description: Product weight in grams as declared by the seller.
+
+      - name: product_length_cm
+        description: Package length in centimetres as declared by the seller.
+
+      - name: product_height_cm
+        description: Package height in centimetres as declared by the seller.
+
+      - name: product_width_cm
+        description: Package width in centimetres as declared by the seller.

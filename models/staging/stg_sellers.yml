@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: stg_sellers
+    description: >
+      Cleaned seller dimension sourced from raw_ecommerce.sellers.
+      One row per seller. Location fields reflect the seller's registered
+      address, not necessarily their warehouse location.
+    columns:
+      - name: seller_id
+        description: Primary key. Unique identifier for each seller.
+        tests:
+          - not_null
+          - unique
+
+      - name: seller_zip_code_prefix
+        description: 5-digit zip code prefix for the seller's registered address.
+        tests:
+          - not_null
+
+      - name: seller_city
+        description: City name for the seller's registered address. May contain raw accents.
+
+      - name: seller_state
+        description: Brazilian state abbreviation for the seller's registered address.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - AC
+                  - AL
+                  - AP
+                  - AM
+                  - BA
+                  - CE
+                  - DF
+                  - ES
+                  - GO
+                  - MA
+                  - MT
+                  - MS
+                  - MG
+                  - PA
+                  - PB
+                  - PR
+                  - PE
+                  - PI
+                  - RJ
+                  - RN
+                  - RS
+                  - RO
+                  - RR
+                  - SC
+                  - SP
+                  - SE
+                  - TO

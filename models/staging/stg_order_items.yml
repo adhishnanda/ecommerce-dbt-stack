@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: stg_order_items
+    description: >
+      Cleaned order line items sourced from raw_ecommerce.order_items.
+      One row per item within an order. The composite key (order_id, order_item_id)
+      is the primary key — order_item_id is a 1-based sequence number scoped to
+      each order, not a globally unique identifier.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - order_item_id
+    columns:
+      - name: order_id
+        description: Foreign key to stg_orders.
+        tests:
+          - not_null
+
+      - name: order_item_id
+        description: >
+          1-based sequence number of the item within its order.
+          An order with three items will have order_item_id values 1, 2, 3.
+        tests:
+          - not_null
+
+      - name: product_id
+        description: Foreign key to stg_products.
+        tests:
+          - not_null
+
+      - name: seller_id
+        description: Foreign key to stg_sellers. The seller fulfilling this line item.
+        tests:
+          - not_null
+
+      - name: shipping_limit_at
+        description: >
+          Deadline by which the seller must hand the item to the carrier.
+          Cast from the raw shipping_limit_date string.
+        tests:
+          - not_null
+
+      - name: price
+        description: Unit sale price of the item in BRL at the time of purchase.
+        tests:
+          - not_null
+
+      - name: freight_value
+        description: >
+          Shipping cost charged to the customer for this line item in BRL.
+          When an order has multiple items, freight is split across them.
+        tests:
+          - not_null

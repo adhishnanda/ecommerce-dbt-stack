@@ -1,0 +1,60 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: >
+      Cleaned order records sourced from raw_ecommerce.orders.
+      One row per order. Timestamps are cast to TIMESTAMP (UTC) and
+      renamed to the _at suffix convention. No business logic applied.
+    columns:
+      - name: order_id
+        description: Surrogate-free primary key for each order.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_id
+        description: Foreign key to stg_customers. One customer can have many orders.
+        tests:
+          - not_null
+
+      - name: order_status
+        description: >
+          Lifecycle status of the order at the time of extraction.
+          Typical terminal states are 'delivered' and 'canceled'.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - delivered
+                  - shipped
+                  - canceled
+                  - unavailable
+                  - invoiced
+                  - processing
+                  - created
+                  - approved
+
+      - name: order_purchased_at
+        description: Timestamp when the customer submitted the order.
+        tests:
+          - not_null
+
+      - name: order_approved_at
+        description: >
+          Timestamp when payment was confirmed. Null for orders that were
+          canceled or became unavailable before payment cleared.
+
+      - name: order_delivered_carrier_at
+        description: Timestamp when the seller handed the package to the carrier.
+
+      - name: order_delivered_customer_at
+        description: Timestamp when the carrier marked the order as delivered.
+
+      - name: order_estimated_delivery_at
+        description: >
+          Estimated delivery date shown to the customer at purchase time.
+          Used to calculate late-delivery flags in downstream models.
+        tests:
+          - not_null

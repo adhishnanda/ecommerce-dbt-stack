@@ -1,0 +1,67 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: >
+      Cleaned customer records sourced from raw_ecommerce.customers.
+      One row per customer_id (order-scoped). Note that a single shopper
+      can appear multiple times with different customer_ids — use
+      customer_unique_id to deduplicate across orders.
+    columns:
+      - name: customer_id
+        description: >
+          Order-scoped customer identifier. Acts as the FK from stg_orders.
+          Not a true unique-customer key — use customer_unique_id for that.
+        tests:
+          - not_null
+          - unique
+
+      - name: customer_unique_id
+        description: >
+          Stable identifier for the same physical shopper across multiple orders.
+          Use this column to count distinct customers in downstream metrics.
+        tests:
+          - not_null
+
+      - name: customer_zip_code_prefix
+        description: 5-digit zip code prefix for the customer's delivery address.
+        tests:
+          - not_null
+
+      - name: customer_city
+        description: City name derived from the zip code prefix. May contain raw accents.
+
+      - name: customer_state
+        description: Brazilian state abbreviation for the customer's delivery address.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - AC
+                  - AL
+                  - AP
+                  - AM
+                  - BA
+                  - CE
+                  - DF
+                  - ES
+                  - GO
+                  - MA
+                  - MT
+                  - MS
+                  - MG
+                  - PA
+                  - PB
+                  - PR
+                  - PE
+                  - PI
+                  - RJ
+                  - RN
+                  - RS
+                  - RO
+                  - RR
+                  - SC
+                  - SP
+                  - SE
+                  - TO

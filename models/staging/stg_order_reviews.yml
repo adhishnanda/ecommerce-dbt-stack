@@ -1,0 +1,51 @@
+version: 2
+
+models:
+  - name: stg_order_reviews
+    description: >
+      Cleaned customer review records sourced from raw_ecommerce.order_reviews.
+      One row per review. The raw source contains ~789 duplicate review_ids;
+      deduplication should be handled in an intermediate model before treating
+      review_id as a primary key. Comment fields are nullable; many reviewers
+      submit a score without text.
+    columns:
+      - name: review_id
+        description: >
+          Review identifier. Not unique in the raw source — duplicates exist
+          and must be deduplicated downstream before use as a PK.
+        tests:
+          - not_null
+
+      - name: order_id
+        description: Foreign key to stg_orders. The order being reviewed.
+        tests:
+          - not_null
+
+      - name: review_score
+        description: Customer satisfaction score from 1 (worst) to 5 (best).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5]
+                quote: false
+
+      - name: review_comment_title
+        description: Optional short title the customer gave their review. Frequently null.
+
+      - name: review_comment_message
+        description: Optional free-text body of the review. Frequently null.
+
+      - name: review_created_at
+        description: >
+          Timestamp when the review form was sent to the customer.
+          This is the invitation timestamp, not when the customer submitted it.
+        tests:
+          - not_null
+
+      - name: review_answered_at
+        description: >
+          Timestamp when the customer submitted their review response.
+          Should always be >= review_created_at.
+        tests:
+          - not_null

@@ -1,0 +1,58 @@
+version: 2
+
+models:
+  - name: stg_order_payments
+    description: >
+      Cleaned payment records sourced from raw_ecommerce.order_payments.
+      One row per payment sequence entry per order. An order can be paid with
+      multiple methods (e.g. voucher + credit card), each getting its own row
+      with an incrementing payment_sequential. The composite key is
+      (order_id, payment_sequential).
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - payment_sequential
+    columns:
+      - name: order_id
+        description: Foreign key to stg_orders.
+        tests:
+          - not_null
+
+      - name: payment_sequential
+        description: >
+          1-based sequence number for each payment method on an order.
+          An order paid with a voucher and a credit card will have
+          payment_sequential values 1 and 2.
+        tests:
+          - not_null
+
+      - name: payment_type
+        description: Payment method used for this sequence entry.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - credit_card
+                  - boleto
+                  - voucher
+                  - debit_card
+                  - not_defined
+
+      - name: payment_installments
+        description: >
+          Number of installments chosen by the customer. Credit card payments
+          in Brazil are commonly split into 2–12 installments interest-free.
+          Non-installment methods will have a value of 1.
+        tests:
+          - not_null
+
+      - name: payment_value
+        description: >
+          Amount charged for this payment sequence entry in BRL.
+          Summing payment_value across all rows for an order gives the
+          total order value including freight.
+        tests:
+          - not_null
